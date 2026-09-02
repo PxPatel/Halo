@@ -164,6 +164,21 @@ export const useHud = create<HudState>()((set) => ({
     }),
 }));
 
+/**
+ * The one thing the HUD says out loud without being asked: capture exclusion
+ * failed, or capture itself is down (SPEC 12 - silent failure is the worst
+ * outcome, because the premise is that you trust this while looking elsewhere).
+ */
+export function selectBanner(state: HudState): string | null {
+  const diagnostics = state.diagnostics;
+  if (!diagnostics) return null;
+  if (!diagnostics.protectionVerified) {
+    return diagnostics.message ?? 'Halo is not hidden from screen capture.';
+  }
+  if (!diagnostics.captureActive && diagnostics.message) return diagnostics.message;
+  return null;
+}
+
 /** Streaming text is parsed on every chunk; a finished result is authoritative. */
 export function selectSections(state: HudState): Sections {
   if (state.active && !state.active.hold) return parseSections(state.active.text);

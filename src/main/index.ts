@@ -20,6 +20,7 @@ import { ScreenTrigger } from './trigger/ScreenTrigger';
 import { createCaptureWindow, createHudWindow } from './window/HaloWindow';
 import { defaultPosition, moveBy, setInteractive, setOpacity } from './window/placement';
 import { platformSupport } from './window/protection';
+import { CAPTURE } from '../shared/constants';
 import type { Command } from '../shared/ipc';
 import type { Mode } from '../shared/types';
 
@@ -103,16 +104,40 @@ function start(): void {
       hotkeyConflicts: hotkeys.conflicts,
     });
 
-  const ensureCapture = (): void => {
-    if (capture.active) return;
+  let captureRetry: ReturnType<typeof setTimeout> | null = null;
+  let captureAttempts = 0;
+
+  const cancelCaptureRetry = (): void => {
+    if (captureRetry === null) return;
+    clearTimeout(captureRetry);
+    captureRetry = null;
+  };
+
+  const retryCapture = (delayMs: number): void => {
+    cancelCaptureRetry();
+    captureRetry = setTimeout(ensureCapture, delayMs);
+  };
+
+  function ensureCapture(): void {
+    cancelCaptureRetry();
+    if (capture.active || settings.get().mode === 'off') return;
     capture
       .start(settings.get().displayId)
-      .then(() => diagnostics())
+      .then(() => {
+        captureAttempts = 0;
+        diagnostics();
+      })
       .catch((error: unknown) => {
         log.error('capture', `could not start: ${String(error)}`);
-        diagnostics('Screen capture is unavailable.');
+        const delay = Math.min(
+          CAPTURE.retryMaxMs,
+          CAPTURE.retryBaseMs * 2 ** Math.min(captureAttempts, 8),
+        );
+        captureAttempts += 1;
+        diagnostics(`Screen capture unavailable — retrying in ${Math.round(delay / 1000)}s.`);
+        retryCapture(delay);
       });
-  };
+  }
 
   const applyMode = (mode: Mode): void => {
     runner.setMode(mode);
@@ -120,6 +145,7 @@ function start(): void {
     if (mode === 'off') {
       screenTrigger.stop();
       manualTrigger.stop();
+      cancelCaptureRetry();
       capture.stop();
     } else {
       manualTrigger.start();
@@ -133,8 +159,14 @@ function start(): void {
 
   capture.onStreamEnded((reason) => {
     log.warn('capture', `stream ended: ${reason}`);
-    diagnostics('Reconnecting to the display...');
-    setTimeout(ensureCapture, 1_000);
+    diagnostics('Reconnecting to the display…');
+    captureAttempts = 0;
+    retryCapture(CAPTURE.retryBaseMs);
+  });
+
+  captureWindow.webContents.on('render-process-gone', (_event, details) => {
+    log.error('capture', `capture renderer gone: ${details.reason}`);
+    if (!captureWindow.isDestroyed()) captureWindow.reload();
   });
   capture.onHash((_hash, distance) =>
     bridge.emit({
@@ -207,6 +239,7 @@ function start(): void {
         rebuildProvider();
         return pushSettings();
       }
+      case 'ready': return publishAll();
       case 'copyToClipboard': return clipboard.writeText(command.text);
       case 'setApiKey': {
         keys.write(command.key);
@@ -220,12 +253,17 @@ function start(): void {
     }
   });
 
-  hud.webContents.on('did-finish-load', () => {
+  const publishAll = (): void => {
+    log.info('ipc', `publishing state to the HUD (apiKey=${keys.has() ? 'stored' : 'missing'})`);
     pushSettings();
     runner.publishState();
     diagnostics();
     if (!keys.has()) bridge.emit({ type: 'ui', ui: { action: 'openSettings', open: true } });
-  });
+  };
+
+  // Both, deliberately: `did-finish-load` can fire before the HUD's listener
+  // is attached, and the HUD's `ready` can arrive before main finished wiring.
+  hud.webContents.on('did-finish-load', publishAll);
 
   applyMode(settings.get().mode);
   app.on('before-quit', () => {

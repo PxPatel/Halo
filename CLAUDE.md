@@ -58,6 +58,11 @@ Each of these is deliberate. If you disagree with one, change the code and the s
 - The `Command` union adds `setApiKey` (§11 and §12 require the HUD to be able to store a key that
   §11 forbids from travelling inside `Settings`) and `copyToClipboard` (§10's `Ctrl+Shift+C` has to
   work while the HUD is unfocused, where the renderer's clipboard API is not reliable).
+- Both unions add `ready`: a renderer announces that its listener exists, and main answers with a
+  full state push (HUD) or accepts commands (capture). `webContents.send` drops messages sent to a
+  renderer that has not attached its listener yet — it does not queue them — so a push tied only to
+  `did-finish-load` is a race, and losing it is how a HUD ends up showing stale state and a capture
+  window ends up ignoring `start`.
 - The `Event` union adds `ui` — a hotkey-driven, renderer-only instruction (tab jump, copy, prompt
   bar, debug overlay, settings). The HUD is deliberately unfocusable (§6), so keystrokes cannot
   reach it any other way.

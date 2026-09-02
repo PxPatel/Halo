@@ -15,11 +15,17 @@ import { SettleDetector } from './settle';
 
 declare global {
   interface Window {
-    haloCapture: HaloCaptureApi;
+    haloCapture?: HaloCaptureApi;
   }
 }
 
-const api = window.haloCapture;
+const exposed = window.haloCapture;
+if (!exposed) {
+  // The window was built without the capture flag, so the preload exposed the
+  // HUD surface instead. Failing loudly here beats a silent command timeout.
+  throw new Error('halo: capture preload surface missing');
+}
+const api: HaloCaptureApi = exposed;
 const video = document.createElement('video');
 video.muted = true;
 video.playsInline = true;
@@ -160,3 +166,7 @@ api.onCommand((command) => {
     });
   });
 });
+
+// Only now can main send anything: webContents.send drops messages that arrive
+// before the listener exists, it does not queue them.
+api.send({ type: 'ready' });

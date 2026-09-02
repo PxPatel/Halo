@@ -23,6 +23,7 @@ const COMMAND_TYPES = new Set<Command['type']>([
   'updateSettings',
   'setApiKey',
   'copyToClipboard',
+  'ready',
 ]);
 
 function isCommand(value: unknown): value is Command {
@@ -72,6 +73,11 @@ export class IpcBridge {
       onMessage: (cb) => {
         this.captureCbs.add(cb);
         return () => this.captureCbs.delete(cb);
+      },
+      onReload: (cb) => {
+        const listener = (): void => cb();
+        this.capture.webContents.on('did-start-loading', listener);
+        return () => this.capture.webContents.off('did-start-loading', listener);
       },
     };
   }

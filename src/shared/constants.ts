@@ -47,6 +47,19 @@ export const AI = {
   cacheTtl: '1h',
 } as const;
 
+/**
+ * Capture transport behaviour. Not user-facing tunables, so they live outside
+ * TUNING, but they are still in one place.
+ */
+export const CAPTURE = {
+  /** A grab is a canvas draw and an encode: fast, or something is wrong. */
+  requestTimeoutMs: 5_000,
+  /** A start is getUserMedia plus first frame, which is slow on a 4K display. */
+  startTimeoutMs: 15_000,
+  retryBaseMs: 2_000,
+  retryMaxMs: 30_000,
+} as const;
+
 /** LRU cap for the in-memory result cache. */
 export const RESULT_CACHE_SIZE = 50;
 

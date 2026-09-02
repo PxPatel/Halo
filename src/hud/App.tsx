@@ -11,6 +11,7 @@ import { Pill } from './components/Pill';
 import { PromptBar } from './components/PromptBar';
 import { Settings } from './components/Settings';
 import {
+  selectBanner,
   selectCategory,
   selectSections,
   selectStatus,
@@ -29,6 +30,7 @@ function minutesLeft(shushUntil: number | null): number | null {
 
 export function App(): JSX.Element {
   const state = useHud();
+  const banner = selectBanner(state);
   const sections = selectSections(state);
   const tab = selectTab(state);
   const view = selectView(state);
@@ -39,10 +41,14 @@ export function App(): JSX.Element {
       const text = selectSections(current).code ?? selectSections(current)[selectTab(current)] ?? '';
       if (text) send({ type: 'copyToClipboard', text });
     };
-    return window.halo.onEvent((event) => {
+    const unsubscribe = window.halo.onEvent((event) => {
       useHud.getState().apply(event);
       if (event.type === 'ui' && event.ui.action === 'copyActive') copyActive();
     });
+    // Main's startup push can land before this listener exists, so ask for
+    // authoritative state now that it does.
+    send({ type: 'ready' });
+    return unsubscribe;
   }, []);
 
   const fontSize = state.settings?.hud.fontSize ?? 14;
@@ -56,9 +62,9 @@ export function App(): JSX.Element {
         maxHeight: `${Math.round(TUNING.hud.maxCardHeightPct * 100)}vh`,
       }}
     >
-      {state.diagnostics && !state.diagnostics.protectionVerified && (
+      {banner !== null && (
         <p className="banner" role="alert">
-          {state.diagnostics.message ?? 'Halo is not hidden from screen capture.'}
+          {banner}
         </p>
       )}
 

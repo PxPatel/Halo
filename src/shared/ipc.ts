@@ -35,7 +35,13 @@ export type Command =
    * Not in SPEC 5's list. Ctrl+Shift+C must copy while the HUD is unfocused,
    * where the renderer's clipboard API is unreliable; main owns the clipboard.
    */
-  | { type: 'copyToClipboard'; text: string };
+  | { type: 'copyToClipboard'; text: string }
+  /**
+   * Not in SPEC 5's list. Main's authoritative state is pushed on
+   * `did-finish-load`, which can fire before the renderer's event listener is
+   * attached; the renderer asks for a fresh push once it is really listening.
+   */
+  | { type: 'ready' };
 
 /**
  * UI-only instructions that originate from a global hotkey. The HUD is not
@@ -107,6 +113,8 @@ export type CaptureCommand =
 
 /** Capture renderer -> main. */
 export type CaptureMessage =
+  /** Sent once the command listener exists. Anything sent before this is lost. */
+  | { type: 'ready' }
   | { type: 'hash'; hash: string; distance: number; at: number }
   | { type: 'settled'; hash: string; thumbnail: string; settledAt: number }
   | { type: 'streamEnded'; reason: string }
