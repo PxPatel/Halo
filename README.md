@@ -22,7 +22,12 @@ npm install
 npm run dev
 ```
 
-On first launch the HUD opens to settings because no key is stored. Paste one, then:
+On first launch the HUD opens to settings because no key is stored. Paste one and save, then
+close settings with `Ctrl+Shift+O` (or Escape).
+
+The HUD is click-through by design: it sits above everything and your clicks pass straight through
+to the app behind it. It becomes clickable only while the settings pane or the prompt bar is open.
+Everything else is driven by hotkeys:
 
 | Chord | Action |
 |---|---|
@@ -33,6 +38,7 @@ On first launch the HUD opens to settings because no key is stored. Paste one, t
 | `Ctrl+Shift+R` | Reveal a held result |
 | `Ctrl+Shift+D` | Dismiss the card |
 | `Ctrl+Shift+S` | Shush for five minutes |
+| `Ctrl+Shift+O` | Open / close settings |
 
 Every binding is remappable in settings. The full list is in `docs/SPEC.md` §10.
 

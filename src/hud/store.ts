@@ -60,8 +60,6 @@ export interface HudState {
   tab: SectionKey;
   apply: (event: Event) => void;
   setTab: (tab: SectionKey) => void;
-  setSettingsOpen: (open: boolean) => void;
-  setPromptBarOpen: (open: boolean) => void;
 }
 
 export const useHud = create<HudState>()((set) => ({
@@ -83,8 +81,6 @@ export const useHud = create<HudState>()((set) => ({
   tab: 'notes',
 
   setTab: (tab) => set({ tab }),
-  setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
-  setPromptBarOpen: (promptBarOpen) => set({ promptBarOpen }),
 
   apply: (event) =>
     set((state) => {
@@ -127,11 +123,12 @@ export const useHud = create<HudState>()((set) => ({
             active: null,
           };
         case 'settings':
+          // Whether the pane is *open* is main's call, not an inference from
+          // the payload: main also has to toggle the window's click-through.
           return {
             settings: event.settings,
             hasApiKey: event.hasApiKey,
             hotkeyConflicts: event.hotkeyConflicts,
-            settingsOpen: state.settingsOpen || !event.hasApiKey,
           };
         case 'diagnostics':
           return {

@@ -63,6 +63,11 @@ Each of these is deliberate. If you disagree with one, change the code and the s
   renderer that has not attached its listener yet — it does not queue them — so a push tied only to
   `did-finish-load` is a race, and losing it is how a HUD ends up showing stale state and a capture
   window ends up ignoring `start`.
+- `Command` also adds `setSettingsOpen`, the pair to §5's `setPromptBarOpen`. The settings pane
+  needs the keyboard too, and main is the only thing that can turn click-through off — without it
+  §12's "no API key configured → HUD opens directly to settings" opens a pane you cannot type into.
+  `DEFAULT_HOTKEYS` gains `settings` (`Ctrl+Shift+O`) for the same reason: §10's table has no
+  binding for settings, and §9 forbids a mouse-only path to anything.
 - The `Event` union adds `ui` — a hotkey-driven, renderer-only instruction (tab jump, copy, prompt
   bar, debug overlay, settings). The HUD is deliberately unfocusable (§6), so keystrokes cannot
   reach it any other way.

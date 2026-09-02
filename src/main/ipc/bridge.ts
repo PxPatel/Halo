@@ -20,6 +20,7 @@ const COMMAND_TYPES = new Set<Command['type']>([
   'setOpacity',
   'move',
   'setPromptBarOpen',
+  'setSettingsOpen',
   'updateSettings',
   'setApiKey',
   'copyToClipboard',

@@ -3,7 +3,7 @@
  * whether one exists and nothing more (SPEC 11).
  */
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { HotkeyConflict } from '../../shared/ipc';
 import type { Mode, Settings as SettingsValue } from '../../shared/types';
 
@@ -21,7 +21,12 @@ export interface SettingsProps {
 
 export function Settings(props: SettingsProps): JSX.Element {
   const [key, setKey] = useState('');
+  const body = useRef<HTMLDivElement>(null);
   const conflicted = new Set(props.conflicts.map((conflict) => conflict.action));
+
+  // The pane is only ever shown while main has made the window focusable, so
+  // taking focus here is what makes Tab and Escape work without a mouse.
+  useEffect(() => body.current?.focus(), []);
 
   return (
     <section className="settings" aria-label="Halo settings">
@@ -32,7 +37,14 @@ export function Settings(props: SettingsProps): JSX.Element {
         </button>
       </header>
 
-      <div className="settings__body" tabIndex={0}>
+      <div
+        ref={body}
+        className="settings__body"
+        tabIndex={0}
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') props.onClose();
+        }}
+      >
         {!props.protectionVerified && (
           <p className="settings__warning" role="alert">
             Screen-capture exclusion is not active. Halo may be visible in screen shares.

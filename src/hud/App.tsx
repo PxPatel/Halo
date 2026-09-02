@@ -74,7 +74,7 @@ export function App(): JSX.Element {
           hasApiKey={state.hasApiKey}
           conflicts={state.hotkeyConflicts}
           protectionVerified={state.diagnostics?.protectionVerified ?? true}
-          onClose={() => state.setSettingsOpen(false)}
+          onClose={() => send({ type: 'setSettingsOpen', open: false })}
           onSetApiKey={(key) => send({ type: 'setApiKey', key })}
           onPatch={(patch) => send({ type: 'updateSettings', patch })}
         />

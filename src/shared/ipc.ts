@@ -25,6 +25,12 @@ export type Command =
   | { type: 'setOpacity'; value: number }
   | { type: 'move'; dx: number; dy: number }
   | { type: 'setPromptBarOpen'; open: boolean }
+  /**
+   * Not in SPEC 5's list, and the pair to `setPromptBarOpen`: the settings
+   * pane also needs keyboard focus, so main has to know when it is open in
+   * order to turn click-through off and back on again.
+   */
+  | { type: 'setSettingsOpen'; open: boolean }
   | { type: 'updateSettings'; patch: Partial<Settings> }
   /**
    * Not in SPEC 5's list. Required by SPEC 11/12: the key never travels as

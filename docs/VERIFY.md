@@ -50,6 +50,9 @@ Unplug the mouse. Every row must be reachable.
 - [ ] `Ctrl+Shift+C` copies the active code block while the HUD is unfocused.
 - [ ] `Ctrl+Shift+1/2/3` jump to Code / Notes / Say.
 - [ ] `Ctrl+Shift+L` toggles the debug overlay and its numbers move.
+- [ ] `Ctrl+Shift+O` opens settings, the pane takes focus, Tab moves through it, and Escape closes
+      it. Click-through is restored afterwards: clicks land on the app behind Halo again.
+- [ ] With no key stored, settings opens by itself *and is typeable* on first launch.
 - [ ] A binding held by another app is marked in settings, and the rest of the app still works.
 
 ## Accessibility (SPEC 9)

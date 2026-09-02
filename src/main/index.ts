@@ -178,9 +178,27 @@ function start(): void {
     }),
   );
 
+  /**
+   * The HUD is click-through and unfocusable except while a surface that needs
+   * the keyboard is open (SPEC 5). Two of them qualify - the prompt bar and the
+   * settings pane - so main tracks both and derives one interactive state.
+   */
+  const surfaces = { promptBar: false, settings: false };
+
+  const syncInteractive = (): void => {
+    setInteractive(hud, surfaces.promptBar || surfaces.settings);
+  };
+
   const promptBar = (open: boolean): void => {
-    setInteractive(hud, open);
+    surfaces.promptBar = open;
+    syncInteractive();
     bridge.emit({ type: 'ui', ui: { action: 'promptBar', open } });
+  };
+
+  const settingsPane = (open: boolean): void => {
+    surfaces.settings = open;
+    syncInteractive();
+    bridge.emit({ type: 'ui', ui: { action: 'openSettings', open } });
   };
 
   const nudgeOpacity = (delta: number): void => {
@@ -214,6 +232,7 @@ function start(): void {
     tabNotes: () => bridge.emit({ type: 'ui', ui: { action: 'focusTab', tab: 'notes' } }),
     tabSay: () => bridge.emit({ type: 'ui', ui: { action: 'focusTab', tab: 'say' } }),
     debug: () => bridge.emit({ type: 'ui', ui: { action: 'toggleDebug' } }),
+    settings: () => settingsPane(!surfaces.settings),
   };
   const conflicts = hotkeys.apply(settings.get().hotkeys, handlers);
   if (conflicts.length > 0) log.warn('hotkeys', `${conflicts.length} binding(s) unavailable`);
@@ -233,6 +252,7 @@ function start(): void {
       }
       case 'move': return move(command.dx, command.dy);
       case 'setPromptBarOpen': return promptBar(command.open);
+      case 'setSettingsOpen': return settingsPane(command.open);
       case 'updateSettings': {
         const updated = settings.update(command.patch);
         if (command.patch.hotkeys) hotkeys.apply(updated.hotkeys, handlers);
@@ -258,7 +278,10 @@ function start(): void {
     pushSettings();
     runner.publishState();
     diagnostics();
-    if (!keys.has()) bridge.emit({ type: 'ui', ui: { action: 'openSettings', open: true } });
+    // A reloaded HUD has forgotten which surfaces were open; main has not.
+    // With no key there is nothing else worth showing, so settings opens itself.
+    promptBar(surfaces.promptBar);
+    settingsPane(keys.has() ? surfaces.settings : true);
   };
 
   // Both, deliberately: `did-finish-load` can fire before the HUD's listener

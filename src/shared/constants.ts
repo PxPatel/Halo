@@ -87,4 +87,5 @@ export const DEFAULT_HOTKEYS: Record<string, string> = {
   tabNotes: 'Control+Shift+2',
   tabSay: 'Control+Shift+3',
   debug: 'Control+Shift+L',
+  settings: 'Control+Shift+O',
 };
