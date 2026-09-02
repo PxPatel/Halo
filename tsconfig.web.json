@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "types": ["vite/client"]
+  },
+  "include": ["src/env.d.ts", "src/shared/**/*.ts", "src/hud/**/*.ts", "src/hud/**/*.tsx", "src/capture-renderer/**/*.ts"]
+}

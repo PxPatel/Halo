@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "lib": ["ES2022", "DOM"],
+    "types": ["node", "vite/client"]
+  },
+  "include": [
+    "src/env.d.ts",
+    "src/shared/**/*.ts",
+    "src/main/**/*.ts",
+    "src/preload/**/*.ts",
+    "src/capture-renderer/dhash.ts",
+    "src/capture-renderer/settle.ts",
+    "tests/**/*.ts",
+    "electron.vite.config.ts",
+    "vitest.config.ts"
+  ]
+}

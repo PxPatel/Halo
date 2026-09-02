@@ -1,0 +1,42 @@
+{
+  "name": "halo",
+  "version": "0.1.0",
+  "description": "A capture-invisible desktop assistant for Windows.",
+  "private": true,
+  "license": "UNLICENSED",
+  "main": "out/main/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "npm run typecheck && electron-vite build",
+    "start": "electron-vite preview",
+    "typecheck": "tsc -p tsconfig.node.json --noEmit && tsc -p tsconfig.web.json --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.0",
+    "electron-store": "^8.2.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.17",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^33.3.1",
+    "electron-vite": "^2.3.0",
+    "eslint": "^9.17.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "shiki": "^1.24.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8",
+    "zustand": "^5.0.2"
+  }
+}

@@ -1,0 +1,425 @@
+/*
+ * Visual language (SPEC 9): one translucent surface, one border, one radius.
+ * No shadows, no gradients, no accent colour beyond the mode dot. Every size
+ * is relative to the root font size, which is a setting, not a constant.
+ */
+
+:root {
+  --surface: rgba(12, 12, 14, 0.82);
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #f4f4f6; /* 17:1 on the card background */
+  --muted: #c8c8d2; /* 11:1 */
+  --radius: 12px;
+  --gray: #8a8a94;
+  --blue: #6aa4ff;
+  --amber: #f5b544;
+  --red: #ff7676;
+  --mono: ui-monospace, "Cascadia Mono", "Consolas", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
+  color: var(--text);
+  font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+}
+
+#root {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.hud {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  width: 100%;
+  padding: 0.5em;
+  line-height: 1.45;
+}
+
+.banner {
+  margin: 0;
+  padding: 0.5em 0.75em;
+  border: 1px solid var(--red);
+  border-radius: var(--radius);
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+  color: var(--red);
+  font-size: 0.85em;
+}
+
+/* Pill ------------------------------------------------------------------- */
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  width: 180px;
+  height: 36px;
+  margin-left: auto;
+  padding: 0 0.75em;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+}
+
+.pill__status {
+  font-size: 0.85em;
+  letter-spacing: 0.02em;
+}
+
+.pill__meta {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.75em;
+}
+
+/* Mode dot --------------------------------------------------------------- */
+
+.mode-dot {
+  flex: 0 0 auto;
+  width: 0.6em;
+  height: 0.6em;
+  border-radius: 50%;
+  background: var(--gray);
+}
+
+.mode-dot--manual {
+  background: var(--blue);
+}
+
+.mode-dot--armed {
+  background: var(--amber);
+}
+
+.mode-dot--held {
+  background: var(--amber);
+}
+
+.mode-dot--error {
+  background: var(--red);
+}
+
+.mode-dot--badge {
+  box-shadow: 0 0 0 2px rgba(245, 181, 68, 0.28);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mode-dot--armed {
+    animation: halo-pulse 2.4s ease-in-out infinite;
+  }
+}
+
+@keyframes halo-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* Card ------------------------------------------------------------------- */
+
+.card,
+.settings {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+}
+
+.card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.6em 0.75em;
+  border-bottom: 1px solid var(--border);
+}
+
+.card__title {
+  margin: 0;
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+.card__dismiss {
+  margin-left: auto;
+  padding: 0 0.35em;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 1.1em;
+  cursor: pointer;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.25em;
+  padding: 0.4em 0.6em 0;
+}
+
+.tabs__tab {
+  display: flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.3em 0.6em;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  font-size: 0.8em;
+  cursor: pointer;
+}
+
+.tabs__tab--active {
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.tabs__tab:focus-visible,
+.card__body:focus-visible,
+.settings__body:focus-visible,
+.prompt__input:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+}
+
+.tabs__hint {
+  color: var(--muted);
+  font-size: 0.75em;
+}
+
+.card__body,
+.settings__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0.6em 0.75em;
+  overflow-y: auto;
+  font-size: 0.9em;
+}
+
+.card__placeholder,
+.card__error {
+  margin: 0;
+  color: var(--muted);
+}
+
+.card__error {
+  color: var(--red);
+}
+
+.md-paragraph {
+  margin: 0 0 0.6em;
+  white-space: pre-wrap;
+}
+
+.md-heading {
+  margin: 0.6em 0 0.3em;
+  font-size: 0.95em;
+}
+
+.md-list {
+  margin: 0 0 0.6em;
+  padding-left: 1.1em;
+}
+
+.md-list li {
+  margin-bottom: 0.25em;
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 0.92em;
+}
+
+.code {
+  margin: 0 0 0.6em;
+  padding: 0.5em 0.6em;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 0.85em;
+}
+
+.code pre {
+  margin: 0;
+  background: transparent !important;
+}
+
+.card__footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.5em 0.75em;
+  border-top: 1px solid var(--border);
+  font-size: 0.8em;
+}
+
+.card__footer button,
+.settings button {
+  padding: 0.3em 0.6em;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: none;
+  color: var(--text);
+  font-size: inherit;
+  cursor: pointer;
+}
+
+.card__elapsed {
+  margin-left: auto;
+  color: var(--muted);
+}
+
+/* Prompt bar ------------------------------------------------------------- */
+
+.prompt {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+}
+
+.prompt__input {
+  width: 100%;
+  padding: 0.6em 0.75em;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9em;
+}
+
+.prompt__hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3em;
+  margin: 0;
+  padding: 0 0.5em 0.5em;
+  list-style: none;
+}
+
+.prompt__hints button {
+  padding: 0.15em 0.45em;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: none;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.75em;
+  cursor: pointer;
+}
+
+/* Settings --------------------------------------------------------------- */
+
+.settings__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+  margin-bottom: 0.75em;
+  font-size: 0.85em;
+}
+
+.settings__field input,
+.settings__field select {
+  padding: 0.35em 0.5em;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.settings__heading {
+  margin: 1em 0 0.4em;
+  font-size: 0.85em;
+}
+
+.settings__warning {
+  margin: 0 0 0.75em;
+  color: var(--red);
+  font-size: 0.85em;
+}
+
+.settings__hotkeys {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8em;
+}
+
+.settings__hotkeys li {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin-bottom: 0.3em;
+}
+
+.settings__hotkeys li span:first-child {
+  flex: 0 0 8em;
+  color: var(--muted);
+}
+
+.settings__hotkeys input {
+  flex: 1 1 auto;
+  padding: 0.2em 0.4em;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: inherit;
+}
+
+.settings__hotkey--conflict input {
+  border-color: var(--red);
+}
+
+.settings__conflict {
+  color: var(--red);
+}
+
+/* Debug ------------------------------------------------------------------ */
+
+.debug {
+  margin: 0;
+  padding: 0.5em 0.75em;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+  font-family: var(--mono);
+  font-size: 0.75em;
+}
+
+.debug__row {
+  display: flex;
+  gap: 0.5em;
+}
+
+.debug__row dt {
+  flex: 0 0 7em;
+  color: var(--muted);
+}
+
+.debug__row dd {
+  margin: 0;
+}
