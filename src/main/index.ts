@@ -2,7 +2,7 @@
  * App lifecycle and wiring. Nothing else belongs in this file (SPEC 3).
  */
 
-import { app, clipboard, dialog } from 'electron';
+import { app, clipboard, dialog, screen } from 'electron';
 import { AnthropicProvider } from './ai/AnthropicProvider';
 import { VisionExtractor } from './ai/extractors/VisionExtractor';
 import type { ModelProvider } from './ai/ModelProvider';
@@ -19,7 +19,7 @@ import { ManualTrigger } from './trigger/ManualTrigger';
 import { ScreenTrigger } from './trigger/ScreenTrigger';
 import { createCaptureWindow, createHudWindow } from './window/HaloWindow';
 import { defaultPosition, moveBy, setInteractive, setOpacity } from './window/placement';
-import { platformSupport } from './window/protection';
+import { assertProtection, platformSupport } from './window/protection';
 import { CAPTURE } from '../shared/constants';
 import type { Command } from '../shared/ipc';
 import type { Mode } from '../shared/types';
@@ -164,6 +164,11 @@ function start(): void {
     retryCapture(CAPTURE.retryBaseMs);
   });
 
+  // A display change can rebuild the surfaces the exclusion flag lives on.
+  screen.on('display-metrics-changed', () => assertProtection(hud));
+  screen.on('display-added', () => assertProtection(hud));
+  screen.on('display-removed', () => assertProtection(hud));
+
   captureWindow.webContents.on('render-process-gone', (_event, details) => {
     log.error('capture', `capture renderer gone: ${details.reason}`);
     if (!captureWindow.isDestroyed()) captureWindow.reload();
@@ -201,9 +206,12 @@ function start(): void {
     bridge.emit({ type: 'ui', ui: { action: 'openSettings', open } });
   };
 
-  const nudgeOpacity = (delta: number): void => {
-    const value = setOpacity(hud, settings.get().hud.opacity + delta);
-    settings.update({ hud: { ...settings.get().hud, opacity: value } });
+  // Opacity goes through a layered-window path on Windows, which is close
+  // enough to the display-affinity machinery to be worth re-asserting after.
+  const changeOpacity = (value: number): void => {
+    const applied = setOpacity(hud, value);
+    assertProtection(hud);
+    settings.update({ hud: { ...settings.get().hud, opacity: applied } });
     pushSettings();
   };
 
@@ -225,8 +233,8 @@ function start(): void {
     moveDown: () => move(0, 1),
     moveLeft: () => move(-1, 0),
     moveRight: () => move(1, 0),
-    opacityDown: () => nudgeOpacity(-0.1),
-    opacityUp: () => nudgeOpacity(0.1),
+    opacityDown: () => changeOpacity(settings.get().hud.opacity - 0.1),
+    opacityUp: () => changeOpacity(settings.get().hud.opacity + 0.1),
     copyCode: () => bridge.emit({ type: 'ui', ui: { action: 'copyActive' } }),
     tabCode: () => bridge.emit({ type: 'ui', ui: { action: 'focusTab', tab: 'code' } }),
     tabNotes: () => bridge.emit({ type: 'ui', ui: { action: 'focusTab', tab: 'notes' } }),
@@ -245,11 +253,7 @@ function start(): void {
       case 'reveal': return runner.reveal();
       case 'dismiss': return runner.dismiss();
       case 'shush': return runner.shush(command.minutes);
-      case 'setOpacity': {
-        const value = setOpacity(hud, command.value);
-        settings.update({ hud: { ...settings.get().hud, opacity: value } });
-        return pushSettings();
-      }
+      case 'setOpacity': return changeOpacity(command.value);
       case 'move': return move(command.dx, command.dy);
       case 'setPromptBarOpen': return promptBar(command.open);
       case 'setSettingsOpen': return settingsPane(command.open);

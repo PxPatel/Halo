@@ -16,7 +16,7 @@ export function Debug(props: DebugProps): JSX.Element {
     ['pipeline', props.pipeline],
     ['shush', props.shushUntil ? new Date(props.shushUntil).toLocaleTimeString() : '—'],
     ['capture', props.diagnostics?.captureActive ? 'active' : 'stopped'],
-    ['protected', props.diagnostics?.protectionVerified ? 'yes' : 'NO'],
+    ['protection', props.diagnostics?.protectionVerified ? 'applied' : 'FAILED'],
     ['hash Δ', String(props.diagnostics?.lastHashDistance ?? '—')],
     ['last request', props.diagnostics?.lastRequestMs ? `${props.diagnostics.lastRequestMs}ms` : '—'],
   ];

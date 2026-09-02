@@ -112,8 +112,13 @@ Each of these is deliberate. If you disagree with one, change the code and the s
 
 ## Status
 
-Everything in the spec is implemented, but the app has **not been run on Windows**: it was built
-and tested on Linux, where `WDA_EXCLUDEFROMCAPTURE`, `globalShortcut` and `desktopCapturer` cannot
-be exercised. Typecheck, lint, unit tests and a production build all pass. `docs/VERIFY.md` — in
-particular the M0 invisibility section — is unrun, and until it passes on real hardware the
-central claim of the product is unverified.
+Running on Windows. The HUD renders, hotkeys fire, settings and the capture pipeline start.
+
+**M0 has failed once and is not yet re-tested.** Halo was visible in a Google Meet full-screen
+share because `setContentProtection` was called while the window was still hidden, and Chromium
+does not apply display affinity to a hidden window or restore it on show (electron#45868, fixed
+upstream in 35.x; this repo is on 33.x). Protection is now asserted on every `show` and `restore`,
+after opacity changes, and after display changes. Until the `docs/VERIFY.md` invisibility section
+passes on real hardware, the central claim of the product remains unproven — and the app cannot
+prove it for you: Electron 33 exposes no way to read a window's display affinity back, so
+`protectionVerified` means "the call was made", not "the window is hidden".

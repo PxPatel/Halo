@@ -52,15 +52,30 @@ export function platformSupport(
   return { supported: true, build };
 }
 
+/**
+ * Assert capture exclusion on a window that is (or is about to be) visible.
+ *
+ * Chromium refuses to set display affinity on a hidden window and does not
+ * restore it when the window is shown again (electron#45868), so a window
+ * created with `show: false` - or hidden by the toggle hotkey - silently ends
+ * up with no protection at all. It has to be re-asserted every time the window
+ * becomes visible, and cheaply enough that doing so is never a problem.
+ */
+export function assertProtection(win: BrowserWindow): boolean {
+  if (win.isDestroyed()) return false;
+  try {
+    win.setContentProtection(true);
+    return true;
+  } catch (error) {
+    log.error('protection', `setContentProtection failed: ${String(error)}`);
+    return false;
+  }
+}
+
 /** Apply the flags and report honestly on whether they took. */
 export function applyProtection(win: BrowserWindow): ProtectionReport {
   const support = platformSupport();
-  let protectionVerified = false;
-  try {
-    win.setContentProtection(true);
-    protectionVerified = support.supported;
-  } catch (error) {
-    log.error('protection', `setContentProtection failed: ${String(error)}`);
+  if (!assertProtection(win)) {
     return {
       supported: support.supported,
       protectionVerified: false,
@@ -68,6 +83,10 @@ export function applyProtection(win: BrowserWindow): ProtectionReport {
       message: 'Screen-capture exclusion could not be enabled. Halo is visible in shares.',
     };
   }
+
+  // The window is still hidden here, so that call did nothing on Windows. It
+  // is asserted again on every `show`; this one only proves the API exists.
+  const protectionVerified = support.supported;
 
   win.setAlwaysOnTop(true, 'screen-saver');
   win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });

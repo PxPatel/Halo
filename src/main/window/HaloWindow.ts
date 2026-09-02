@@ -9,8 +9,9 @@ import { BrowserWindow, screen } from 'electron';
 import { join } from 'node:path';
 import { TUNING } from '../../shared/constants';
 import type { Settings } from '../../shared/types';
+import { log } from '../log';
 import { CAPTURE_FLAG } from '../../shared/ipc';
-import { applyProtection, type ProtectionReport } from './protection';
+import { applyProtection, assertProtection, type ProtectionReport } from './protection';
 
 const isDev = !!process.env['ELECTRON_RENDERER_URL'];
 
@@ -63,7 +64,19 @@ export function createHudWindow(settings: Settings): HudWindow {
   const protection = applyProtection(win);
   win.setIgnoreMouseEvents(true, { forward: true });
   win.setOpacity(settings.hud.opacity);
-  win.once('ready-to-show', () => win.showInactive());
+
+  // Where the protection is really established: a hidden window cannot hold
+  // display affinity, so every transition into visibility re-asserts it.
+  win.on('show', () => {
+    assertProtection(win);
+    log.info('protection', 'capture exclusion asserted on show');
+  });
+  win.on('restore', () => assertProtection(win));
+  win.once('ready-to-show', () => {
+    win.showInactive();
+    assertProtection(win);
+  });
+
   load(win, 'hud');
 
   return { win, protection };

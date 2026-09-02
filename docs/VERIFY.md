@@ -9,6 +9,17 @@ differs between builds, so a pass on one build is not a pass on another.
 
 ## Invisibility (SPEC 6)
 
+Halo cannot check this for itself. Windows offers no way to read a window's
+display affinity back through Electron, so the app can only report that it made
+the call — the list below is the only real evidence, which is why it is run by
+hand before every release.
+
+Re-run the whole invisibility section after any change to how the HUD window is
+created, shown, hidden, or made transparent. Chromium will not apply capture
+exclusion to a window that is not visible, so a window shown later, or hidden
+and shown again by `Ctrl+\`, has to re-assert it — and the failure is silent
+and total.
+
 Two mechanisms are being tested, and they fail independently. Content protection hides Halo's
 *pixels*; the tool-window style hides Halo's *entry* from window lists. A build can pass every
 pixel test and still show up by name in Zoom's picker.
@@ -23,6 +34,10 @@ pixel test and still show up by name in Zoom's picker.
 - [ ] `Win+Shift+S` snip over the HUD. The snip contains the desktop behind Halo, not Halo.
 - [ ] Xbox Game Bar (`Win+G`) capture. Halo is invisible in the recording.
 - [ ] Alt-Tab. Halo does not appear.
+- [ ] Hide and re-show Halo with `Ctrl+\` during a share, then re-check: it is
+      still invisible. Protection is re-asserted on every show, and this is the
+      case that silently loses it.
+- [ ] Change opacity with `Ctrl+Alt+[` / `]` during a share, then re-check.
 - [ ] A fullscreen browser is focused. Halo appears above it and does **not** steal focus: typing
       continues to reach the browser.
 
