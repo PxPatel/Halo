@@ -38,7 +38,7 @@ export function createHudWindow(settings: Settings): HudWindow {
   const position = settings.hud.position;
 
   const win = new BrowserWindow({
-    width: TUNING.hud.cardWidth,
+    width: settings.hud.width,
     height,
     x: position.x,
     y: position.y,

@@ -7,6 +7,7 @@
 import { create } from 'zustand';
 import type { Command, Event, HaloApi, HotkeyConflict } from '../shared/ipc';
 import { parseSections, presentSections } from '../shared/sections';
+import type { Tone } from './components/ModeDot';
 import type {
   AssistanceResult,
   Category,
@@ -194,6 +195,15 @@ export function selectTab(state: HudState): SectionKey {
 
 export function selectCategory(state: HudState): Category {
   return state.active?.category ?? state.result?.category ?? 'none';
+}
+
+/** One accent colour carries mode and pipeline state everywhere (SPEC 9). */
+export function selectTone(state: HudState): Tone {
+  if (state.pipeline === 'error' || state.error) return 'error';
+  if (state.mode === 'off') return 'off';
+  if (state.pipeline === 'held') return 'held';
+  if (state.mode === 'manual') return 'manual';
+  return 'armed';
 }
 
 export type View = 'settings' | 'card' | 'pill';

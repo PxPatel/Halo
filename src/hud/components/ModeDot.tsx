@@ -1,14 +1,8 @@
-/** The whole status vocabulary in one 8px dot (SPEC 9). */
+/** The whole status vocabulary in one dot (SPEC 9). */
 
-import type { Mode, PipelineStateName } from '../../shared/types';
+export type Tone = 'off' | 'manual' | 'armed' | 'held' | 'error';
 
-export interface ModeDotProps {
-  mode: Mode;
-  pipeline: PipelineStateName;
-  lowConfidence: boolean;
-}
-
-const LABELS: Record<string, string> = {
+const LABELS: Record<Tone, string> = {
   off: 'Off',
   manual: 'Manual',
   armed: 'Auto, armed',
@@ -16,21 +10,17 @@ const LABELS: Record<string, string> = {
   error: 'Error',
 };
 
-function tone(props: ModeDotProps): keyof typeof LABELS {
-  if (props.pipeline === 'error') return 'error';
-  if (props.mode === 'off') return 'off';
-  if (props.pipeline === 'held') return 'held';
-  if (props.mode === 'manual') return 'manual';
-  return 'armed';
+export interface ModeDotProps {
+  tone: Tone;
+  lowConfidence: boolean;
 }
 
 export function ModeDot(props: ModeDotProps): JSX.Element {
-  const state = tone(props);
   return (
     <span
-      className={`mode-dot mode-dot--${state}${props.lowConfidence ? ' mode-dot--badge' : ''}`}
+      className={`dot dot--${props.tone}${props.lowConfidence ? ' dot--badge' : ''}`}
       role="img"
-      aria-label={LABELS[state]}
+      aria-label={LABELS[props.tone]}
     />
   );
 }

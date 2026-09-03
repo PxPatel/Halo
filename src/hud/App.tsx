@@ -17,6 +17,7 @@ import {
   selectStatus,
   selectTab,
   selectTabs,
+  selectTone,
   selectView,
   send,
   useHud,
@@ -34,6 +35,11 @@ export function App(): JSX.Element {
   const sections = selectSections(state);
   const tab = selectTab(state);
   const view = selectView(state);
+  const tone = selectTone(state);
+  const hotkeys = state.settings?.hotkeys ?? {};
+  const copy = (text: string): void => {
+    if (text) send({ type: 'copyToClipboard', text });
+  };
 
   useEffect(() => {
     const copyActive = (): void => {
@@ -55,7 +61,7 @@ export function App(): JSX.Element {
 
   return (
     <div
-      className={`hud hud--${view}`}
+      className={`hud hud--${view} hud--tone-${tone}`}
       style={{
         // Layout must not break at 20px, so every size is relative to this.
         fontSize: `${fontSize}px`,
@@ -80,30 +86,28 @@ export function App(): JSX.Element {
         />
       ) : view === 'card' ? (
         <Card
-          mode={state.mode}
-          pipeline={state.pipeline}
+          tone={tone}
           category={selectCategory(state)}
           sections={sections}
           tabs={selectTabs(state)}
           tab={tab}
           streaming={state.active !== null}
+          fromCache={state.result?.fromCache ?? false}
           elapsedMs={state.elapsedMs}
           error={state.error}
           lowConfidence={state.lowConfidence}
+          hotkeys={hotkeys}
           onSelectTab={state.setTab}
           onDismiss={() => send({ type: 'dismiss' })}
-          onCopy={() => {
-            const text = sections.code ?? sections[tab] ?? '';
-            if (text) send({ type: 'copyToClipboard', text });
-          }}
+          onCopy={copy}
           onRegenerate={() => send({ type: 'submitPrompt', text: '/again' })}
         />
       ) : (
         <Pill
-          mode={state.mode}
-          pipeline={state.pipeline}
+          tone={tone}
           status={selectStatus(state)}
           lowConfidence={state.lowConfidence}
+          revealChord={hotkeys['reveal']}
           shushMinutesLeft={minutesLeft(state.shushUntil)}
         />
       )}

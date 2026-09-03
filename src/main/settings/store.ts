@@ -6,7 +6,7 @@
 
 import Store from 'electron-store';
 import { z } from 'zod';
-import { DEFAULT_HOTKEYS, MODELS, TUNING } from '../../shared/constants';
+import { DEFAULT_HOTKEYS, HUD_LIMITS, MODELS, TUNING } from '../../shared/constants';
 import type { Settings } from '../../shared/types';
 import { log } from '../log';
 
@@ -17,7 +17,8 @@ const SettingsSchema = z.object({
   hotkeys: z.record(z.string(), z.string()),
   hud: z.object({
     opacity: z.number().min(0.2).max(1),
-    fontSize: z.number().min(11).max(28),
+    fontSize: z.number().min(HUD_LIMITS.minFontSize).max(HUD_LIMITS.maxFontSize),
+    width: z.number().min(HUD_LIMITS.minWidth).max(HUD_LIMITS.maxWidth),
     position: z.object({ x: z.number(), y: z.number() }),
   }),
   models: z.object({ classify: z.string().min(1), generate: z.string().min(1) }),
@@ -31,6 +32,7 @@ export const DEFAULT_SETTINGS: Settings = {
   hud: {
     opacity: TUNING.hud.idleOpacity,
     fontSize: 14,
+    width: TUNING.hud.cardWidth,
     position: { x: 64, y: 64 },
   },
   models: { classify: MODELS.classify, generate: MODELS.generate },

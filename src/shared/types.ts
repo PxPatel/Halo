@@ -105,6 +105,8 @@ export type PipelineStateName =
 export interface HudSettings {
   opacity: number;
   fontSize: number;
+  /** Card width in px. The window follows it. */
+  width: number;
   position: { x: number; y: number };
 }
 

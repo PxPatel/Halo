@@ -18,9 +18,9 @@ import { SettingsStore } from './settings/store';
 import { ManualTrigger } from './trigger/ManualTrigger';
 import { ScreenTrigger } from './trigger/ScreenTrigger';
 import { createCaptureWindow, createHudWindow } from './window/HaloWindow';
-import { defaultPosition, moveBy, setInteractive, setOpacity } from './window/placement';
+import { defaultPosition, moveBy, setInteractive, setOpacity, setWidth } from './window/placement';
 import { assertProtection, platformSupport } from './window/protection';
-import { CAPTURE } from '../shared/constants';
+import { CAPTURE, HUD_LIMITS } from '../shared/constants';
 import type { Command } from '../shared/ipc';
 import type { Mode } from '../shared/types';
 
@@ -215,6 +215,13 @@ function start(): void {
     pushSettings();
   };
 
+  const changeWidth = (width: number): void => {
+    const applied = setWidth(hud, width);
+    assertProtection(hud);
+    settings.update({ hud: { ...settings.get().hud, width: applied } });
+    pushSettings();
+  };
+
   const move = (dx: number, dy: number): void => {
     const position = moveBy(hud, dx, dy);
     settings.update({ hud: { ...settings.get().hud, position } });
@@ -235,6 +242,8 @@ function start(): void {
     moveRight: () => move(1, 0),
     opacityDown: () => changeOpacity(settings.get().hud.opacity - 0.1),
     opacityUp: () => changeOpacity(settings.get().hud.opacity + 0.1),
+    widthDown: () => changeWidth(settings.get().hud.width - HUD_LIMITS.widthStep),
+    widthUp: () => changeWidth(settings.get().hud.width + HUD_LIMITS.widthStep),
     copyCode: () => bridge.emit({ type: 'ui', ui: { action: 'copyActive' } }),
     tabCode: () => bridge.emit({ type: 'ui', ui: { action: 'focusTab', tab: 'code' } }),
     tabNotes: () => bridge.emit({ type: 'ui', ui: { action: 'focusTab', tab: 'notes' } }),
@@ -260,6 +269,10 @@ function start(): void {
       case 'updateSettings': {
         const updated = settings.update(command.patch);
         if (command.patch.hotkeys) hotkeys.apply(updated.hotkeys, handlers);
+        // Width and opacity are window state, not just stored values.
+        if (command.patch.hud?.width !== undefined) setWidth(hud, updated.hud.width);
+        if (command.patch.hud?.opacity !== undefined) setOpacity(hud, updated.hud.opacity);
+        if (command.patch.hud !== undefined) assertProtection(hud);
         rebuildProvider();
         return pushSettings();
       }

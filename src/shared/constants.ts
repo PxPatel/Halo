@@ -68,6 +68,15 @@ export const MIN_WINDOWS_BUILD = 19041;
 
 export const PILL_SIZE = { width: 180, height: 36 } as const;
 
+/** How far the user may take the HUD, and in what steps. */
+export const HUD_LIMITS = {
+  minWidth: 340,
+  maxWidth: 760,
+  widthStep: 40,
+  minFontSize: 11,
+  maxFontSize: 24,
+} as const;
+
 export const DEFAULT_HOTKEYS: Record<string, string> = {
   toggleHud: 'Control+\\',
   captureNow: 'Control+Return',
@@ -82,6 +91,8 @@ export const DEFAULT_HOTKEYS: Record<string, string> = {
   moveRight: 'Control+Alt+Right',
   opacityDown: 'Control+Alt+[',
   opacityUp: 'Control+Alt+]',
+  widthDown: 'Control+Alt+-',
+  widthUp: 'Control+Alt+=',
   copyCode: 'Control+Shift+C',
   tabCode: 'Control+Shift+1',
   tabNotes: 'Control+Shift+2',

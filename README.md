@@ -39,6 +39,7 @@ Everything else is driven by hotkeys:
 | `Ctrl+Shift+D` | Dismiss the card |
 | `Ctrl+Shift+S` | Shush for five minutes |
 | `Ctrl+Shift+O` | Open / close settings |
+| `Ctrl+Alt+-` / `=` | Make the card narrower / wider |
 
 Every binding is remappable in settings. The full list is in `docs/SPEC.md` §10.
 

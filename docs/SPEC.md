@@ -509,15 +509,20 @@ export const TUNING = {
 
 **Pill** (collapsed) — 180×36. Mode dot plus a one-word status. Always visible when the app is on.
 
-**Card** (expanded) — `cardWidth` wide, capped at 55% of screen height with internal scroll.
+**Card** (expanded) — user-set width (`hud.width`, 340–760, default `cardWidth`), capped at 55% of
+screen height with internal scroll. Width is adjustable from settings and from a hotkey; the
+window follows it.
 
 **Prompt bar** — slides up from the card's lower edge. The only focusable surface.
 
 ### Card anatomy
 
-Header: category label, mode dot, dismiss affordance. Tabs: `Code` / `Notes` / `Say`, hiding any
-tab whose section is absent. Body: streamed markdown, `shiki` for code blocks. Footer: copy button,
-regenerate, elapsed time.
+Header: mode dot, category label as an uppercase eyebrow, a `cached` chip when the answer came
+from the result cache, elapsed time, dismiss affordance. A hairline sweeps under the header while
+a response is streaming. Tabs: `Code` / `Notes` / `Say` as a segmented control with a sliding
+indicator, hiding any tab whose section is absent. Body: streamed markdown, `shiki` for code
+blocks, each block carrying a header with its language and a copy button. Footer: copy and
+regenerate, with their chords rendered as keycaps.
 
 The `Say` tab is short declarative sentences meant to be read aloud while speaking. Constrain it in
 the prompt to at most four bullets, no sentence longer than about fifteen words. It is the
@@ -525,9 +530,20 @@ highest-value surface in the product and the easiest to get wrong by letting it 
 
 ### Visual language
 
-Background `rgba(12, 12, 14, 0.82)` with `backdrop-filter: blur(20px)`. Border `1px solid
-rgba(255,255,255,0.08)`. Radius 12px. No shadows, no gradients, no accent colors beyond the mode
-dot. Monospace only inside code blocks.
+One material, used everywhere: background `rgba(13, 14, 18, 0.86)` with
+`backdrop-filter: blur(22px) saturate(140%)`, a `1px solid rgba(255,255,255,0.09)` hairline, 14px
+radius (the pill is a capsule), a soft elevation shadow, and a single top sheen — a 96px
+`rgba(255,255,255,0.05)` fade — so the panel reads as glass lying on the desktop rather than a
+rectangle pasted onto it. No other gradients, no second material, no illustration.
+
+There is exactly one accent colour and it is the mode dot's: manual blue, auto amber, error red,
+off grey. It is applied as a CSS variable on the whole HUD, so the active tab, focus rings, list
+markers, the streaming caret and anything waiting for you all carry the current state's colour
+without any of them being a separate decision. Nothing else is coloured.
+
+Type is one family at one scale, sized in `em` against the user's base font size; monospace only
+inside code, keycaps and the debug overlay. Numbers that change in place — elapsed time, shush
+minutes — are tabular.
 
 ### Mode dot
 
@@ -584,6 +600,8 @@ from settings from day one.
 | `Ctrl+Shift+S` | Shush 5 minutes |
 | `Ctrl+Alt+↑↓←→` | Move HUD |
 | `Ctrl+Alt+[` / `]` | Opacity down / up |
+| `Ctrl+Alt+-` / `=` | Card width down / up |
+| `Ctrl+Shift+O` | Open / close settings |
 | `Ctrl+Shift+C` | Copy active code block |
 | `Ctrl+Shift+1/2/3` | Jump to Code / Notes / Say |
 
@@ -609,7 +627,12 @@ interface Settings {
   displayId: string | null;
   scriptPath: string | null;      // markdown file injected into cached system prompt
   hotkeys: Record<string, string>;
-  hud: { opacity: number; fontSize: number; position: { x: number; y: number } };
+  hud: {
+    opacity: number;
+    fontSize: number;
+    width: number;                // card width in px, 340..760
+    position: { x: number; y: number };
+  };
   models: { classify: string; generate: string };
 }
 ```

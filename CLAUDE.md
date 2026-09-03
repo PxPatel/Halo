@@ -17,6 +17,12 @@ in the repo and records every place the implementation knowingly departs from th
 `npm test`, `npm run lint`, `npm run typecheck` and `npm run build` all run on any platform. The
 app itself only runs on Windows 10 build 19041+ (see SPEC §1).
 
+## Commit messages
+
+- A one-line summary, then bullets.
+- One bullet per change, plainly stated. No paragraphs, no narrative.
+- Say what changed and why in the same breath when the why is not obvious.
+
 ## The invariants that matter
 
 1. **Main owns all state.** The HUD's zustand store is a mirror updated only by `Event`s. A
@@ -66,8 +72,8 @@ Each of these is deliberate. If you disagree with one, change the code and the s
 - `Command` also adds `setSettingsOpen`, the pair to §5's `setPromptBarOpen`. The settings pane
   needs the keyboard too, and main is the only thing that can turn click-through off — without it
   §12's "no API key configured → HUD opens directly to settings" opens a pane you cannot type into.
-  `DEFAULT_HOTKEYS` gains `settings` (`Ctrl+Shift+O`) for the same reason: §10's table has no
-  binding for settings, and §9 forbids a mouse-only path to anything.
+  `DEFAULT_HOTKEYS` gains `settings` (`Ctrl+Shift+O`) for the same reason — §9 forbids a mouse-only
+  path to anything — and `widthDown`/`widthUp` for the card size. §10's table now carries all three.
 - The `Event` union adds `ui` — a hotkey-driven, renderer-only instruction (tab jump, copy, prompt
   bar, debug overlay, settings). The HUD is deliberately unfocusable (§6), so keystrokes cannot
   reach it any other way.
@@ -88,7 +94,8 @@ Each of these is deliberate. If you disagree with one, change the code and the s
   (§13 asks for `settle.test.ts`, which needs a pure module to test), `hud/main.tsx`,
   `hud/index.html`, `capture-renderer/index.html` (renderer entry points),
   `hud/components/Markdown.tsx` (renders model output as React elements rather than HTML, so
-  model output can never inject markup) and `hud/components/Debug.tsx` (§12's overlay).
+  model output can never inject markup), `hud/components/Debug.tsx` (§12's overlay) and
+  `hud/components/Kbd.tsx` (renders an accelerator as keycaps, used by the card and the pill).
 - One preload file serves both renderers and picks its surface from an `additionalArguments` flag.
   A second preload entry would make rollup emit a shared chunk, and a sandboxed preload cannot
   `require` one.

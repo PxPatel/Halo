@@ -1,21 +1,23 @@
-/** The collapsed HUD: 180x36, a dot and a word. */
+/** The collapsed HUD: a dot, a word, and at most one hint. */
 
-import type { Mode, PipelineStateName } from '../../shared/types';
-import { ModeDot } from './ModeDot';
+import { Kbd } from './Kbd';
+import { ModeDot, type Tone } from './ModeDot';
 
 export interface PillProps {
-  mode: Mode;
-  pipeline: PipelineStateName;
+  tone: Tone;
   status: string;
   lowConfidence: boolean;
+  /** Shown when a result is waiting: the chord that reveals it. */
+  revealChord?: string;
   shushMinutesLeft: number | null;
 }
 
 export function Pill(props: PillProps): JSX.Element {
   return (
-    <div className="pill" role="status" aria-live="polite">
-      <ModeDot mode={props.mode} pipeline={props.pipeline} lowConfidence={props.lowConfidence} />
-      <span className="pill__status">{props.status}</span>
+    <div className="pill surface" role="status" aria-live="polite">
+      <ModeDot tone={props.tone} lowConfidence={props.lowConfidence} />
+      <span className="pill__label">{props.status}</span>
+      {props.tone === 'held' && props.revealChord && <Kbd chord={props.revealChord} />}
       {props.shushMinutesLeft !== null && (
         <span className="pill__meta">{props.shushMinutesLeft}m</span>
       )}

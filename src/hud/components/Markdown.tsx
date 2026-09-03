@@ -92,14 +92,26 @@ function inline(text: string, keyPrefix: string): JSX.Element {
   );
 }
 
-export function Markdown({ source }: { source: string }): JSX.Element {
+export interface MarkdownProps {
+  source: string;
+  onCopyCode?: (code: string) => void;
+}
+
+export function Markdown({ source, onCopyCode }: MarkdownProps): JSX.Element {
   return (
     <>
       {toBlocks(source).map((block, index) => {
         const key = `block-${index}`;
         switch (block.kind) {
           case 'code':
-            return <CodeBlock key={key} code={block.text} language={block.language} />;
+            return (
+              <CodeBlock
+                key={key}
+                code={block.text}
+                language={block.language}
+                onCopy={onCopyCode}
+              />
+            );
           case 'heading':
             return (
               <h4 key={key} className="md-heading">

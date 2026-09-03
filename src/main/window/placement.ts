@@ -1,7 +1,7 @@
 /** Move, opacity, click-through and focus toggling. No view logic. */
 
 import { screen, type BrowserWindow } from 'electron';
-import { PILL_SIZE, TUNING } from '../../shared/constants';
+import { HUD_LIMITS, PILL_SIZE, TUNING } from '../../shared/constants';
 
 const MOVE_STEP = 24;
 
@@ -36,6 +36,25 @@ export function setInteractive(win: BrowserWindow, interactive: boolean): void {
   win.setFocusable(interactive);
   if (interactive) win.focus();
   else win.blur();
+}
+
+/**
+ * Resize the HUD. The window is created non-resizable so the user cannot drag
+ * it around by an invisible edge, and Windows ignores a resize on such a
+ * window, so the flag is lifted for the duration of the call.
+ */
+export function setWidth(win: BrowserWindow, width: number): number {
+  const clamped = Math.round(
+    Math.min(HUD_LIMITS.maxWidth, Math.max(HUD_LIMITS.minWidth, width)),
+  );
+  const bounds = win.getBounds();
+  if (bounds.width === clamped) return clamped;
+  win.setResizable(true);
+  win.setBounds({ ...bounds, width: clamped });
+  win.setResizable(false);
+  const next = clampToDisplay(win, bounds.x, bounds.y);
+  win.setPosition(next.x, next.y);
+  return clamped;
 }
 
 export function defaultPosition(): { x: number; y: number } {

@@ -55,14 +55,16 @@ export function resolveLanguage(language: string): string | null {
 export interface CodeBlockProps {
   code: string;
   language: string;
+  onCopy?: (code: string) => void;
 }
 
 export function CodeBlock(props: CodeBlockProps): JSX.Element {
   const [html, setHtml] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const lang = resolveLanguage(props.language);
 
   useEffect(() => {
     let live = true;
-    const lang = resolveLanguage(props.language);
     if (!lang) {
       setHtml(null);
       return;
@@ -77,15 +79,39 @@ export function CodeBlock(props: CodeBlockProps): JSX.Element {
     return () => {
       live = false;
     };
-  }, [props.code, props.language]);
+  }, [props.code, lang]);
 
-  if (html === null) {
-    return (
-      <pre className="code">
-        <code>{props.code}</code>
-      </pre>
-    );
-  }
-  // shiki escapes the code it renders; nothing else is injected here.
-  return <div className="code" dangerouslySetInnerHTML={{ __html: html }} />;
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 1_200);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
+
+  return (
+    <figure className="code">
+      <figcaption className="code__head">
+        <span className="code__lang">{lang ?? props.language ?? 'text'}</span>
+        {props.onCopy && (
+          <button
+            type="button"
+            className="code__copy"
+            onClick={() => {
+              props.onCopy?.(props.code);
+              setCopied(true);
+            }}
+          >
+            {copied ? 'Copied' : 'Copy'}
+          </button>
+        )}
+      </figcaption>
+      {html === null ? (
+        <pre className="code__body">
+          <code>{props.code}</code>
+        </pre>
+      ) : (
+        // shiki escapes the code it renders; nothing else is injected here.
+        <div className="code__body" dangerouslySetInnerHTML={{ __html: html }} />
+      )}
+    </figure>
+  );
 }

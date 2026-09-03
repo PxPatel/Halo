@@ -1,4 +1,4 @@
-/** The only focusable surface in the HUD (SPEC 5). */
+/** The only focusable surface in the HUD besides settings (SPEC 5). */
 
 import { useEffect, useRef, useState } from 'react';
 
@@ -27,7 +27,7 @@ export function PromptBar(props: PromptBarProps): JSX.Element | null {
 
   return (
     <form
-      className="prompt"
+      className="prompt surface"
       onSubmit={(event) => {
         event.preventDefault();
         const value = text.trim();
@@ -35,17 +35,22 @@ export function PromptBar(props: PromptBarProps): JSX.Element | null {
         props.onClose();
       }}
     >
-      <input
-        ref={input}
-        className="prompt__input"
-        value={text}
-        placeholder="Ask a follow-up, or / for commands"
-        aria-label="Ask Halo"
-        onChange={(event) => setText(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === 'Escape') props.onClose();
-        }}
-      />
+      <div className="prompt__row">
+        <span className="prompt__caret" aria-hidden="true">
+          ›
+        </span>
+        <input
+          ref={input}
+          className="prompt__input"
+          value={text}
+          placeholder="Ask a follow-up, or / for commands"
+          aria-label="Ask Halo"
+          onChange={(event) => setText(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') props.onClose();
+          }}
+        />
+      </div>
       {hints.length > 0 && (
         <ul className="prompt__hints" aria-label="Slash commands">
           {hints.map((command) => (
